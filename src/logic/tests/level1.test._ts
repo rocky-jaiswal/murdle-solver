@@ -1,0 +1,16 @@
+// import { head } from 'ramda'
+
+import { suspectLocationMatrix } from '../level1'
+
+describe('level1', () => {
+  test('matrix', () => {
+    // console.log(suspectLocationMatrix)
+    expect(suspectLocationMatrix).not.toBeNull()
+    expect(suspectLocationMatrix.matrix.length).toBe(9)
+  })
+
+  // test('clues sort', () => {
+  //   // console.log(sortedByClues)
+  //   expect(head(sortedByClues)?.clueCount).toBe(2)
+  // })
+})

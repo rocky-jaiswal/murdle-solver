@@ -35,5 +35,14 @@ const router = createBrowserRouter([
 ])
 
 export const Router = () => {
-  return <RouterProvider router={router} fallbackElement={<h1>Loading...</h1>} />
+  return (
+    <RouterProvider
+      router={router}
+      fallbackElement={
+        <div>
+          <h1>Loading...</h1>
+        </div>
+      }
+    />
+  )
 }
