@@ -30,10 +30,12 @@ const showIcon = (clues: Clue[], elem1: string, elem2: string) => {
     f2 = 'weapon'
   }
 
-  if (isNil(clues.find((clue) => clue[f1] === elem1 && clue[f2] === elem2))) {
+  //@ts-ignore
+  if (isNil(clues.find((clue: Clue) => clue[f1] === elem1 && clue[f2] === elem2))) {
     return '-'
   }
 
+  //@ts-ignore
   return clues.find((clue) => clue[f1] === elem1 && clue[f2] === elem2)?.validity ? '✅' : '❌'
 }
 

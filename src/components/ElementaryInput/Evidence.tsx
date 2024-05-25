@@ -10,7 +10,7 @@ interface Props {
 export const Evidence = (props: Props) => {
   return (
     <div className="flex flex-row items-center">
-      <span>🪦 Murder was - </span>
+      <span>💀 Murder was - </span>
       <select
         className="select mx-2"
         onChange={(e) => {

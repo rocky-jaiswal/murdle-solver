@@ -1,5 +1,6 @@
 import { append, isNotNil } from 'ramda'
 import { useState } from 'react'
+import clsx from 'clsx'
 
 import { Answer, Clue } from '/@/store'
 import { solveLevel1 } from '/@/logic/level1'
@@ -147,28 +148,30 @@ export const ElementaryInput: React.FC<Props> = ({ clues, setClues }: Props) => 
       />
       <span className="divider" />
       <div className="flex">
-        <button
-          className="btn btn-success w-48"
-          onClick={() => {
-            const soln = solveLevel1(clues, { [evidence]: evidenceDetails } as unknown as Answer)
-            setFinalClue(soln ?? null)
-          }}
-        >
-          Solve!
-        </button>
+        <div>
+          <button
+            className="btn btn-success w-48"
+            onClick={() => {
+              const soln = solveLevel1(clues, { [evidence]: evidenceDetails } as unknown as Answer)
+              setFinalClue(soln ?? null)
+            }}
+          >
+            Solve!
+          </button>
+        </div>
+        <div className={isNotNil(finalClue) ? clsx('mx-4 grow border border-green-500 p-2') : ''}>
+          {isNotNil(finalClue) ? (
+            <div>
+              <div>Suspect: {finalClue.suspect}</div>
+              <div>Weapon: {finalClue.weapon}</div>
+              <div>Location: {finalClue.location}</div>
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
       <span className="divider" />
-      <div>
-        {isNotNil(finalClue) ? (
-          <div>
-            <div>Suspect: {finalClue.suspect}</div>
-            <div>Weapon: {finalClue.weapon}</div>
-            <div>Location: {finalClue.location}</div>
-          </div>
-        ) : (
-          <></>
-        )}
-      </div>
     </div>
   )
 }
