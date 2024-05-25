@@ -6,6 +6,7 @@ import {
   intersection,
   isNil,
   isNotNil,
+  range,
   uniq,
   xprod,
 } from 'ramda'
@@ -108,96 +109,126 @@ export const assignHard = (matrix: Matrix, clues: Clue[]) => {
     (clue) => isNil(clue[elem1]) && isNotNil(clue[elem2]) && isNotNil(clue.validity),
   )
 
+  // console.log('-----------------------')
+  // console.log(matrix.name)
+  // console.log({ elem1, elem2, elem3 })
+  // console.log({ otherCluesWithElem2 })
+
   otherCluesWithElem2.forEach((otherClueWithElem2) => {
     const e3 = otherClueWithElem2[elem3]
 
     const withElem3 = clues.filter((clue) => clue[elem3] === e3 && isNotNil(clue[elem1]))
 
-    // console.log('-----------------------')
-    // console.log({ elem1, elem2, elem3 })
     // console.log({ otherClueWithElem2 })
     // console.log({ withElem3 })
 
-    if (matrix.name === 'suspect-weapon') {
-      clues = append(
-        {
-          suspect: withElem3[0]!.suspect,
-          weapon: otherClueWithElem2.weapon,
-          validity: withElem3[0]!.validity && otherClueWithElem2.validity,
-        },
-        clues,
-      )
-    }
-    if (matrix.name === 'suspect-location') {
-      clues = append(
-        {
-          suspect: withElem3[0]!.suspect,
-          location: otherClueWithElem2.location,
-          validity: withElem3[0]!.validity && otherClueWithElem2.validity,
-        },
-        clues,
-      )
-    }
-    if (matrix.name === 'weapon-location') {
-      clues = append(
-        {
-          weapon: withElem3[0]!.weapon,
-          location: otherClueWithElem2.location,
-          validity: withElem3[0]!.validity && otherClueWithElem2.validity,
-        },
-        clues,
-      )
+    if (withElem3.length > 0) {
+      withElem3.forEach((we3) => {
+        if (matrix.name === 'suspect-weapon') {
+          clues = append(
+            {
+              suspect: we3.suspect,
+              weapon: otherClueWithElem2.weapon,
+              validity: we3.validity && otherClueWithElem2.validity,
+            },
+            clues,
+          )
+        }
+        if (matrix.name === 'suspect-location') {
+          clues = append(
+            {
+              suspect: we3.suspect,
+              location: otherClueWithElem2.location,
+              validity: we3.validity && otherClueWithElem2.validity,
+            },
+            clues,
+          )
+        }
+        if (matrix.name === 'weapon-location') {
+          clues = append(
+            {
+              weapon: we3.weapon,
+              location: otherClueWithElem2.location,
+              validity: we3.validity && otherClueWithElem2.validity,
+            },
+            clues,
+          )
+        }
+      })
     }
   })
 
   return clues
 }
 
-// export const sortedByClues = reverse(
-//   sortBy(prop('clueCount'))([suspectWeaponMatrix, suspectLocationMatrix, weaponLocationMatrix]),
-// )
+const solveByCount = (clues: Clue[]) => {
+  let updatedClues: Clue[] = clues
 
-export const solveLevel1 = (clues: Clue[], evidence: Answer) => {
+  // console.log(updatedClues)
+
   // the matrices
   const suspectWeaponMatrix = {
     name: 'suspect-weapon',
     matrix: xprod(suspects, weapons),
-    clueCount: clues.filter((clue) => clue.suspect && clue.weapon && isNotNil(clue.validity))
+    clueCount: updatedClues.filter((clue) => clue.suspect && clue.weapon && isNotNil(clue.validity))
       .length,
   }
   const suspectLocationMatrix = {
     name: 'suspect-location',
     matrix: xprod(suspects, locations),
-    clueCount: clues.filter((clue) => clue.suspect && clue.location && isNotNil(clue.validity))
-      .length,
+    clueCount: updatedClues.filter(
+      (clue) => clue.suspect && clue.location && isNotNil(clue.validity),
+    ).length,
   }
   const weaponLocationMatrix = {
     name: 'weapon-location',
     matrix: xprod(weapons, locations),
-    clueCount: clues.filter((clue) => clue.weapon && clue.location && isNotNil(clue.validity))
-      .length,
+    clueCount: updatedClues.filter(
+      (clue) => clue.weapon && clue.location && isNotNil(clue.validity),
+    ).length,
   }
 
   const allMatrices = [suspectWeaponMatrix, suspectLocationMatrix, weaponLocationMatrix]
 
+  // solve the easier matrices first
+  const easyMat = allMatrices.filter((mat) => mat.clueCount === 2)
+
+  if (easyMat.length > 0) {
+    // console.log('em')
+    easyMat.forEach((mat) => {
+      updatedClues = assignEasy(mat, updatedClues)
+    })
+
+    return updatedClues
+  }
+
+  const hardMat = allMatrices.filter((mat) => mat.clueCount === 1)
+
+  if (hardMat.length > 0) {
+    // console.log('hm')
+    updatedClues = assignHard(hardMat[0], updatedClues)
+  }
+
+  return updatedClues
+}
+
+export const solveLevel1 = (clues: Clue[], evidence: Answer) => {
   let updatedClues: Clue[] = clues
 
-  allMatrices.forEach((matrix) => {
-    if (matrix.clueCount === 2) {
-      updatedClues = assignEasy(matrix, updatedClues)
-    } else {
-      updatedClues = assignHard(matrix, updatedClues)
-    }
+  range(1, 5).forEach(() => {
+    // console.log('in range')
+    updatedClues = solveByCount(updatedClues)
   })
 
-  updatedClues = assignEasy(suspectLocationMatrix, updatedClues)
-  updatedClues = assignEasy(weaponLocationMatrix, updatedClues)
-
+  // console.log('==========solution==============')
   // console.log(updatedClues)
+  // console.log(updatedClues.filter((clue) => clue.validity))
   // console.log(evidence)
 
-  if (isNotNil(evidence.what)) {
-    const final = updatedClues.filter((clue) => clue.weapon === evidence.what && clue.validity)
+  if (isNotNil(evidence.with)) {
+    const final = updatedClues.filter((clue) => clue.weapon === evidence.with && clue.validity)
+
+    // console.log(final)
 
     return {
       suspect: final.find((clue) => clue.suspect && clue.validity)?.suspect,

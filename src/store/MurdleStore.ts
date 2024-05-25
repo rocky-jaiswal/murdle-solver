@@ -10,7 +10,7 @@ export interface Clue {
 
 export interface Answer {
   who: string | null
-  what: string | null
+  with: string | null
   where: string | null
 }
 
@@ -48,7 +48,7 @@ export const useMurdleStore = create<MurdleState>()(
         level: 1, // default value
         answer: {
           who: null,
-          what: null,
+          with: null,
           where: null,
         },
         clues: [],
