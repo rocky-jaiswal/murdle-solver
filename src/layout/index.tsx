@@ -25,7 +25,7 @@ export const Layout: React.FC<Props> = () => {
   return (
     <div
       data-theme={themeState.currentTheme}
-      className="v-screen flex h-screen min-h-full min-w-full flex-col"
+      className="v-screen flex h-screen h-screen flex-col items-center"
     >
       <AuthenticationContext.Provider value={authenticationState}>
         <ThemeContext.Provider value={themeState}>
